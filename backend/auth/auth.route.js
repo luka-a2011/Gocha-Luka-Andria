@@ -63,26 +63,22 @@ const authRouter = Router()
  *                   example: user exist
  */
 authRouter.post("/sign-up", async (req, res) => {
-    const {error} = userSchema.validate(req.body || {})
-    if(error){
-        return res.status(400).json(error)
+    const { error } = userSchema.validate(req.body || {});
+    if (error) {
+        return res.status(400).json(error);
     }
 
-    const {fullName, email, password} = req.body
+    const { fullName, email, password } = req.body;
 
-    const existUser = await userModel.findOne({email})
-    if(existUser){
-        return res.status(400).json({message: "user exist"})
+    const existUser = await userModel.findOne({ email });
+    if (existUser) {
+        return res.status(400).json({ message: "User already exists" });
     }
 
- 
+    const hashedPass = await bcrypt.hash(password, 10);
 
-const hashedPass = await bcrypt.hash(password, 10)
-await userModel.create({fullName, password: hashedPass, email})
- res.status(201).json({message: "user exist"})
-    
-})
-
+    res.status(201).json({ message: "User created successfully" });
+});
 
 
 /**
@@ -155,7 +151,8 @@ authRouter.post("/sign-in", async  (req, res) => {
 
     const token = await jwt.sign(payload, process.env.JWT_SECRET, {expiresIn: "1h"})
 
-    res.json(token)
+    res.json({ token, role: existUser.role });
+
 })
 
 

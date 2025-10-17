@@ -14,10 +14,36 @@ export default function Login() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ ...formData, accountType });
-    alert("Login submitted! Check console for data.");
+
+    try {
+      const response = await fetch("http://localhost:3000/auth/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          accountType // optional if you want to store type
+        })
+      });
+
+      const token = await response.json();
+
+      if (response.ok) {
+        // Save JWT token in localStorage
+        localStorage.setItem("token", token);
+        alert("Login successful!");
+        // Redirect to dashboard or homepage
+        window.location.href = "/dashboard";
+      } else {
+        alert(token.message || "Login failed");
+        console.log(token);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Try again.");
+    }
   };
 
   return (
@@ -67,15 +93,15 @@ export default function Login() {
         </div>
 
         <p className="switch-text">
-        Dont have an account? <a href="/Register">Register</a>
-      </p>
+          Dont have an account? <a href="/Register">Register</a>
+        </p>
 
         <button type="submit" className="submit-btn">Login</button>
 
         <button className="google-btn">
-  <img src={Google} alt="Google logo" />
-  <span>Sign in with Google</span>
-</button>
+          <img src={Google} alt="Google logo" />
+          <span>Sign in with Google</span>
+        </button>
 
       </form>
     </div>

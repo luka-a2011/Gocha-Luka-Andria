@@ -50,7 +50,7 @@ const postRouter = Router()
  *         description: Server error
  */
 postRouter.get("/", async (req, res) => {
-    const posts = await postModels.find().sort({_id: -1}).populate({path: "author", select: "fullname email"})
+    const posts = await postModels.find().sort({_id: -1}).populate({path: "author", select: "email"})
     res.status(200).json(posts)
 })
 
@@ -104,16 +104,23 @@ postRouter.get("/", async (req, res) => {
  *                   example: fill in user-id
  */
 postRouter.post("/", upload.single("image"), async (req, res) => {
-    const {content, title} = req.body
-    if(!content || !title){
-        return  res.status(400).json({message: "fill in user-id"})
+    const { descriptione, Location } = req.body;
+    const image = req.file?.path;
+
+    if (!image || !descriptione || !Location) {
+        return res.status(400).json({ message: "All fields are required" });
     }
 
-    const image = req.file?.path
+    await postModels.create({
+        image,
+        descriptione,
+        Location,
+        author: req.userId
+    });
 
-    await postModels.create({content, title, author: req.userId, image})
-    res.status(201).json({message: "created"})
-})
+    res.status(201).json({ message: "created" });
+});
+
 
 /**
  * @swagger
@@ -187,93 +194,6 @@ postRouter.delete("/:id", async (req, res) => {
 /**
  * @swagger
  * /posts/{postId}/comments:
- *   post:
- *     summary: Add a comment to a specific post
- *     tags:
- *       - Posts
- *     description: Adds a new comment to the post with the specified ID. The user must be authenticated to comment.
- *     parameters:
- *       - in: path
- *         name: postId
- *         required: true
- *         description: The ID of the post to comment on
- *         schema:
- *           type: string
- *           example: 60f6f5f6e1f1c8a9d8f0e5b2
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - content
- *             properties:
- *               content:
- *                 type: string
- *                 example: This is a great post!
- *     responses:
- *       201:
- *         description: Comment successfully added to the post
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 author:
- *                   type: string
- *                   example: 60f6f5f6e1f1c8a9d8f0e5b2
- *                 content:
- *                   type: string
- *                   example: This is a great post!
- *                 createdAt:
- *                   type: string
- *                   format: date-time
- *                   example: '2025-06-20T15:00:00.000Z'
- *       400:
- *         description: Missing content in the request body
- *       404:
- *         description: Post not found
- *       500:
- *         description: Server error
- */
-postRouter.post("/:postId/comments", async (req, res) => {
-    const { postId } = req.params;
-    const { content } = req.body;
-
-
-    if (!content) {
-        return res.status(400).json({ message: "Content is required" });
-    }
-
-    const post = await postModels.findById(postId);
-
-
-    if (!post) {
-        return res.status(404).json({ message: "Post not found" });
-    }
-
-
-    const comment = {
-        author: req.userId,  
-        content,
-        createdAt: new Date()
-    };
-
-
-    post.comments.push(comment);
-
-
-    await post.save();
-
-
-    res.status(201).json(comment);
-});
-
-
-/**
- * @swagger
- * /posts/{postId}/comments:
  *   get:
  *     summary: Get all comments for a specific post
  *     tags:
@@ -318,18 +238,5 @@ postRouter.post("/:postId/comments", async (req, res) => {
  *       500:
  *         description: Server error
  */
-postRouter.get("/:postId/comments", async (req, res) => {
-    const { postId } = req.params;
-
- 
-    const post = await postModels.findById(postId).populate("comments.author", "fullname email");
-
-
-    if (!post) {
-        return res.status(404).json({ message: "Post not found" });
-    }
-
-    res.status(200).json(post.comments);
-});
 
 module.exports = postRouter

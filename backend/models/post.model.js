@@ -2,22 +2,19 @@ const { default: mongoose,  } = require("mongoose");
 
 
 const postSchema = new mongoose.Schema({
-    content: {
-        type: String
-    },
-    title: {
-        type: String
-    },
-    author: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "user",
+    image: {
+        type: String,
         require: true
     },
-    comments: [{
-        author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-        content: { type: String, required: true },
-        createdAt: { type: Date, default: Date.now }
-      }],
+    descriptione: {
+        type: String,
+        require: true
+    },
+    Location : {
+        type: String,
+        require: true
+    },
+   
     
    
 }, {timestamps: true})

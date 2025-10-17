@@ -3,9 +3,6 @@ const { default: mongoose,  } = require("mongoose");
 
 
 const userSchema = new mongoose.Schema({
-    fullName: {
-        type: String
-    },
     email: {
         type: String,
         lowercase: true,
@@ -21,6 +18,11 @@ const userSchema = new mongoose.Schema({
         ref: "post",
         default: []
     },
+    role: {
+        type: String,
+        enum: ["user", "admin"],
+        default: "user" // everyone else is user by default
+    }
 })
 
 

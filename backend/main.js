@@ -12,7 +12,6 @@ const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
 
-// const upload = multer({storage})
 
 app.use(cors())
 app.use(express.json())

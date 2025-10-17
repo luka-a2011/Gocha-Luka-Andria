@@ -5,11 +5,9 @@ import Google from "../assets/google.png";
 export default function Register() {
   const [accountType, setAccountType] = useState("volunteer");
   const [formData, setFormData] = useState({
+    fullName: "",
     email: "",
-    password: "",
-    cardNumber: "",
-    expiry: "",
-    cvv: ""
+    password: ""
   });
 
   const handleChange = (e) => {
@@ -17,10 +15,34 @@ export default function Register() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ ...formData, accountType });
-    alert("Registration submitted! Check console for data.");
+
+    try {
+      const response = await fetch("http://localhost:3000/auth/sign-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          accountType: accountType
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.status === 201) {
+        alert("Registration successful! Please log in.");
+        window.location.href = "/login";
+      } else {
+        alert(data.message || "Registration failed");
+        console.log(data);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Try again.");
+    }
   };
 
   return (
@@ -46,6 +68,18 @@ export default function Register() {
 
       <form onSubmit={handleSubmit}>
         <div className="input-group">
+          <label>Full Name</label>
+          <input
+            type="text"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            required
+            placeholder="Your full name"
+          />
+        </div>
+
+        <div className="input-group">
           <label>Email</label>
           <input
             type="email"
@@ -69,53 +103,16 @@ export default function Register() {
           />
         </div>
 
-        <div className="input-group">
-          <label>Credit Card Number</label>
-          <input
-            type="text"
-            name="cardNumber"
-            value={formData.cardNumber}
-            onChange={handleChange}
-            required
-            placeholder="1234 5678 9012 3456"
-          />
-        </div>
-
-        <div className="credit-info">
-          <div>
-            <label>Expiry</label>
-            <input
-              type="text"
-              name="expiry"
-              value={formData.expiry}
-              onChange={handleChange}
-              required
-              placeholder="MM/YY"
-            />
-          </div>
-          <div>
-            <label>CVV</label>
-            <input
-              type="text"
-              name="cvv"
-              value={formData.cvv}
-              onChange={handleChange}
-              required
-              placeholder="123"
-            />
-          </div>
-        </div>
-
         <p className="switch-text">
-        Already have an account? <a href="/Login">Log in</a>
-      </p>
+          Already have an account? <a href="/Login">Log in</a>
+        </p>
 
         <button type="submit" className="submit-btn">Register</button>
 
         <button className="google-btn">
-  <img src={Google} alt="Google logo" />
-  <span>Sign in with Google</span>
-</button>
+          <img src={Google} alt="Google logo" />
+          <span>Sign in with Google</span>
+        </button>
 
       </form>
     </div>
