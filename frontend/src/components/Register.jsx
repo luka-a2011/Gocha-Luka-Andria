@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./register.css";
+import Google from "../assets/google.png";
 
 export default function Register() {
   const [accountType, setAccountType] = useState("volunteer");
@@ -105,7 +106,17 @@ export default function Register() {
           </div>
         </div>
 
+        <p className="switch-text">
+        Already have an account? <a href="/Login">Log in</a>
+      </p>
+
         <button type="submit" className="submit-btn">Register</button>
+
+        <button className="google-btn">
+  <img src={Google} alt="Google logo" />
+  <span>Sign in with Google</span>
+</button>
+
       </form>
     </div>
   );

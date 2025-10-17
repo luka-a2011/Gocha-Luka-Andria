@@ -1,0 +1,38 @@
+.dashboard {
+  padding: 80px 20px;
+  text-align: center;
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+.dashboard h1 {
+  color: #16a34a;
+  margin-bottom: 10px;
+}
+
+.dashboard p {
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.admin-controls {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.admin-controls button {
+  padding: 12px 24px;
+  border: none;
+  background: #16a34a;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.admin-controls button:hover {
+  background: #0d7a38;
+}

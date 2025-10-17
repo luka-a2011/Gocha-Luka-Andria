@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import "./register.css"; // reuse the same CSS for consistent style
+import "./register.css";
+import Google from "../assets/google.png";
 
 export default function Login() {
   const [accountType, setAccountType] = useState("volunteer");
@@ -65,7 +66,17 @@ export default function Login() {
           />
         </div>
 
+        <p className="switch-text">
+        Dont have an account? <a href="/Register">Register</a>
+      </p>
+
         <button type="submit" className="submit-btn">Login</button>
+
+        <button className="google-btn">
+  <img src={Google} alt="Google logo" />
+  <span>Sign in with Google</span>
+</button>
+
       </form>
     </div>
   );
