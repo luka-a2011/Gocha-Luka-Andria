@@ -58,7 +58,7 @@ function Report() {
         will help volunteers find and address environmental issues.
       </p>
 
-      <div className="new-report">
+       <div className="new-report">
         <h3>New Report</h3>
         <form onSubmit={handleSubmit} className="report-form">
           <div className="form-group">
