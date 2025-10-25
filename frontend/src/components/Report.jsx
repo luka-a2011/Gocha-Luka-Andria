@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Report.css"; // optional, create for styling
+import "./Report.css";
 import cameraIcon from "../assets/camera.png";
 
 function Report() {
@@ -11,15 +11,43 @@ function Report() {
     setPhoto(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // handle form submission logic here
-    console.log({ photo, description, location });
-    alert("Report submitted!");
-    // clear form
-    setPhoto(null);
-    setDescription("");
-    setLocation("");
+
+    if (!photo || !description || !location) {
+      alert("All fields are required!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", photo);
+    formData.append("descriptione", description);
+    formData.append("Location", location);
+
+    try {
+      const token = localStorage.getItem("token"); // make sure you save token on login
+      const response = await fetch("http://localhost:3000/posts", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.status === 201) {
+        alert("Report created successfully!");
+        setPhoto(null);
+        setDescription("");
+        setLocation("");
+      } else {
+        alert(data.message || "Error creating report");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit report");
+    }
   };
 
   return (
@@ -32,32 +60,29 @@ function Report() {
 
       <div className="new-report">
         <h3>New Report</h3>
-        <p>Provide details about the trash spot to help volunteers understand the situation</p>
-
         <form onSubmit={handleSubmit} className="report-form">
           <div className="form-group">
             <label>Before Photo *</label>
-              <div className="photo-upload">
-      <input
-        id="photoInput"
-        type="file"
-        accept="image/*"
-        onChange={handlePhotoChange}
-        style={{ display: "none" }}
-      />
-      <label htmlFor="photoInput">
-        <img src={cameraIcon} alt="Upload" className="camera-icon" />
-      </label>
+            <div className="photo-upload">
+              <input
+                id="photoInput"
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                style={{ display: "none" }}
+              />
+              <label htmlFor="photoInput">
+                <img src={cameraIcon} alt="Upload" className="camera-icon" />
+              </label>
 
-      {photo && <span className="photo-name">Selected: {photo.name}</span>}
-    </div>
-            {photo && <span>Selected: {photo.name}</span>}
+              {photo && <span className="photo-name">Selected: {photo.name}</span>}
+            </div>
           </div>
 
           <div className="form-group">
             <label>Description *</label>
             <textarea
-            className="brd"
+              className="brd"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={500}
@@ -76,18 +101,10 @@ function Report() {
             />
           </div>
 
-          <button type="submit" className="reportBTN">Submit Report</button>
+          <button type="submit" className="reportBTN">
+            Submit Report
+          </button>
         </form>
-
-        <div className="tips">
-          <h4>Tips for Good Reports</h4>
-          <ul>
-            <li>Take clear photos showing the extent of the problem</li>
-            <li>Include landmarks or street names for easy location</li>
-            <li>Mention any safety hazards (broken glass, chemicals, etc.)</li>
-            <li>Describe the type and amount of trash present</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
