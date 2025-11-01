@@ -1,23 +1,25 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config()
+require("dotenv").config();
 
-const isAuth = async (req, res, next) => {
-  
-    const headers = req.headers["authorization"]
-    if(!headers) {
-        return res.status(401).json({message: "no"})
+const isAuth = (req, res, next) => {
+    const authHeader = req.headers["authorization"];
+    if (!authHeader) {
+        return res.status(401).json({ message: "Unauthorized: No token provided" });
     }
 
-    const [type, token] = headers.split(" ")
-    try{
-        const payload = await jwt.verify(token, process.env.JWT_SECRET)
-        req.userId = payload.userId
-        req.role = payload.role
-
-          next()
-    }catch(e){
-        return res.status(401).json({message: "no"})
+    const [type, token] = authHeader.split(" ");
+    if (type !== "Bearer" || !token) {
+        return res.status(401).json({ message: "Unauthorized: Invalid token format" });
     }
-}
 
-module.exports = isAuth
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        req.userId = payload.userId;
+        req.role = payload.role; // You can check this in your routes for admin
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: "Unauthorized: Token invalid or expired" });
+    }
+};
+
+module.exports = isAuth;

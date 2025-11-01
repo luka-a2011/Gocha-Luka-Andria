@@ -63,21 +63,29 @@ const authRouter = Router()
  *                   example: user exist
  */
 authRouter.post("/sign-up", async (req, res) => {
-    const { error } = userSchema.validate(req.body || {});
-    if (error) {
-        return res.status(400).json(error);
+    try {
+        const { fullName, email, password } = req.body;
+
+        const existUser = await userModel.findOne({ email });
+        if (existUser) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+
+        const hashedPass = await bcrypt.hash(password, 10);
+
+        // 👇 Save user to DB
+        await userModel.create({
+            fullName,
+            email,
+            password: hashedPass,
+            role: email === "your@email.com" ? "admin" : "user" // make yourself admin if you want
+        });
+
+        res.status(201).json({ message: "User created successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
-
-    const { fullName, email, password } = req.body;
-
-    const existUser = await userModel.findOne({ email });
-    if (existUser) {
-        return res.status(400).json({ message: "User already exists" });
-    }
-
-    const hashedPass = await bcrypt.hash(password, 10);
-
-    res.status(201).json({ message: "User created successfully" });
 });
 
 

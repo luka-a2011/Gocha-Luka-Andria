@@ -14,6 +14,11 @@ const postSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    author: {                      // 👈 add this
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true
+  }
    
     
    

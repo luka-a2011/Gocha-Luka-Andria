@@ -14,37 +14,41 @@ export default function Login() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:3000/auth/sign-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          accountType // optional if you want to store type
-        })
-      });
+  try {
+    const response = await fetch("http://localhost:3000/auth/sign-in", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        accountType // optional
+      }),
+    });
 
-      const token = await response.json();
+    // ✅ Parse response properly
+    const data = await response.json();
 
-      if (response.ok) {
-        // Save JWT token in localStorage
-        localStorage.setItem("token", token);
-        alert("Login successful!");
-        // Redirect to dashboard or homepage
-        window.location.href = "/dashboard";
-      } else {
-        alert(token.message || "Login failed");
-        console.log(token);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong. Try again.");
+    if (response.ok) {
+      // ✅ Save token and role separately
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
+
+      alert("Login successful!");
+      // ✅ Redirect user
+      window.location.href = "/dashboard";
+    } else {
+      alert(data.message || "Login failed");
+      console.log(data);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong. Try again.");
+  }
+};
+
 
   return (
     <div className="container">

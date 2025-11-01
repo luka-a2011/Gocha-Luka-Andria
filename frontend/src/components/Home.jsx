@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; 
 import "./Home.css";
 import ImageCarousel from "./ImageCarousel";
@@ -10,6 +10,10 @@ const Home = () => {
   const [selectedReportTitle, setSelectedReportTitle] = useState("");
   const [selectedAmount, setSelectedAmount] = useState(null);
   const [customAmount, setCustomAmount] = useState("");
+  const [posts, setPosts] = useState([]);
+
+  const userId = localStorage.getItem("userId");
+  const userRole = localStorage.getItem("role");
 
   const openDonateModal = (title) => {
     setSelectedReportTitle(title);
@@ -39,6 +43,53 @@ const Home = () => {
     closeDonateModal();
   };
 
+  // Fetch posts from backend
+  const fetchPosts = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch("http://localhost:3000/posts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setPosts(data);
+      } else {
+        console.error("Failed to fetch posts:", await response.json());
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  // Delete post
+  const handleDelete = async (postId) => {
+    const confirm = window.confirm("Are you sure you want to delete this post?");
+    if (!confirm) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(`http://localhost:3000/posts/${postId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        alert("Post deleted successfully!");
+        setPosts(posts.filter((p) => p._id !== postId));
+      } else {
+        const data = await response.json();
+        alert(data.message || "Failed to delete post");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete post");
+    }
+  };
+
   return (
     <div className="home">
       <section className="hero">
@@ -49,17 +100,10 @@ const Home = () => {
             Together we create cleaner, healthier communities one spot at a time.
           </p>
           <div className="hero-buttons">
-            <button
-              className="report-btn"
-              onClick={() => navigate("/Report")} 
-            >
+            <button className="report-btn" onClick={() => navigate("/Report")}>
               Report Trash Spot
             </button>
-
-            <button
-              className="join-btn"
-              onClick={() => navigate("/CleanUp")} 
-            >
+            <button className="join-btn" onClick={() => navigate("/CleanUp")}>
               Join Cleanup
             </button>
           </div>
@@ -68,7 +112,7 @@ const Home = () => {
 
       <section className="stats">
         <p className="subtitle">COMMUNITY VOLUNTEERS CLEANING UP THE ENVIRONMENT</p>
-        <h2>3 Active Reports</h2>
+        <h2>{posts.length} Active Reports</h2>
       </section>
 
       <section className="feed">
@@ -76,92 +120,29 @@ const Home = () => {
         <p className="filter">All • Need Cleanup • Cleaned</p>
 
         <div className="report-list">
-          <div className="report-card">
-            <ImageCarousel
-              images={[
-                "https://www.quickwasters.co.uk/wp-content/uploads/2023/05/Most-Common-Littered-Items.jpg",
-                "https://19january2017snapshot.epa.gov/sites/production/files/styles/medium/public/2016-04/trash-parking-lot.jpg"
-              ]}
-            />
-            <div className="report-info">
-              <h3>
-                Large pile of plastic bottles and food containers left near the hiking trail entrance.
-              </h3>
-              <p>
-                <strong>Location:</strong> Central Park, Trail Entrance <br />
-                Reported: 1/15/2025 • Cleaned: 1/18/2025
-              </p>
-              <p className="donations">12 donations</p>
-              <button
-                className="donate-btn"
-                onClick={() =>
-                  openDonateModal(
-                    "Large pile of plastic bottles and food containers left near the hiking trail entrance."
-                  )
-                }
-              >
-                Donate
-              </button>
-            </div>
-          </div>
+          {posts.map((post) => (
+            <div className="report-card" key={post._id}>
+              <ImageCarousel images={[post.image]} />
+              <div className="report-info">
+                <h3>{post.descriptione}</h3>
+                <p>
+                  <strong>Location:</strong> {post.Location} <br />
+                  Reported: {new Date(post.createdAt).toLocaleDateString()} 
+                </p>
+                <p className="donations">0 donations</p>
 
-          <div className="report-card">
-            <ImageCarousel
-              images={[
-                "https://www.quickwasters.co.uk/wp-content/uploads/2023/05/Most-Common-Littered-Items.jpg",
-                "https://19january2017snapshot.epa.gov/sites/production/files/styles/medium/public/2016-04/trash-parking-lot.jpg"
-              ]}
-            />
-            <div className="report-info">
-              <h3>
-                Large pile of plastic bottles and food containers left near the hiking trail entrance.
-              </h3>
-              <p>
-                <strong>Location:</strong> Central Park, Trail Entrance <br />
-                Reported: 1/15/2025 • Cleaned: 1/18/2025
-              </p>
-              <p className="donations">15 donations</p>
-              <button
-                className="donate-btn"
-                onClick={() =>
-                  openDonateModal(
-                    "Large pile of plastic bottles and food containers left near the hiking trail entrance."
-                  )
-                }
-              >
-                Donate
-              </button>
-            </div>
-          </div>
+                <button className="donate-btn" onClick={() => openDonateModal(post.descriptione)}>
+                  Donate
+                </button>
 
-          <div className="report-card">
-            <ImageCarousel
-              images={[
-                "https://www.quickwasters.co.uk/wp-content/uploads/2023/05/Most-Common-Littered-Items.jpg",
-                "https://19january2017snapshot.epa.gov/sites/production/files/styles/medium/public/2016-04/trash-parking-lot.jpg"
-              ]}
-            />
-            <div className="report-info">
-              <h3>
-                Large pile of plastic bottles and food containers left near the hiking trail entrance.
-              </h3>
-              <p>
-                <strong>Location:</strong> Central Park, Trail Entrance <br />
-                Reported: 1/15/2025 • Cleaned: 1/18/2025
-              </p>
-              <p className="donations">10 donations</p>
-              <button
-                className="donate-btn"
-                onClick={() =>
-                  openDonateModal(
-                    "Large pile of plastic bottles and food containers left near the hiking trail entrance."
-                  )
-                }
-              >
-                Donate
-              </button>
+                {(post.author._id.toString() === userId || userRole === "admin") && (
+                  <button className="delete-btn" onClick={() => handleDelete(post._id)}>
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
 
